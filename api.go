@@ -172,6 +172,28 @@ type CommentListing struct {
 	Kind string
 }
 
+type SubredditListing struct {
+	Data struct {
+		Children []SubredditInfo
+	}
+}
+
+type SubredditInfo struct {
+	Data struct {
+		Id                 string
+		Display_name       string
+		Header_img         string
+		Title              string
+		Over18             bool
+		Subscribers        int
+		Name               string
+		Url                string
+		Public_description string
+		Subreddit_type     string
+	}
+	Kind string
+}
+
 // Get posts in a subreddit
 // TODO: implement sorting
 func (c *Client) GetSubreddit(sr string, sort string, limit int) ([]Link, error) {
@@ -187,10 +209,38 @@ func (c *Client) GetSubreddit(sr string, sort string, limit int) ([]Link, error)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
+
 	if err != nil {
 		return nil, err
 	}
 	var data LinkListing
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data.Data.Children, err
+}
+
+// Search for subreddits
+func (c *Client) SearchSubreddits(q string, limit int) ([]SubredditInfo, error) {
+	params := make(url.Values)
+	params.Set("limit", strconv.Itoa(limit))
+	params.Set("q", q)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%v/subreddits/search.json?%v", REDDIT_URL, params.Encode()), nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if err != nil {
+		return nil, err
+	}
+	var data SubredditListing
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		return nil, err
