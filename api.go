@@ -17,9 +17,9 @@ const DELAY_S = 2 * time.Second
 // Client represents a custom Reddit client that respects the Reddit API rate limit guidelines
 type Client struct {
 	httpClient *http.Client
-	modhash string
-	UserAgent string
-	lock chan bool
+	modhash    string
+	UserAgent  string
+	lock       chan bool
 	lastAccess time.Time
 }
 
@@ -33,7 +33,7 @@ func NewClient(userAgent string) *Client {
 }
 
 // private utility function to do an API request
-// implements rate-limiting and is thread-safe 
+// implements rate-limiting and is thread-safe
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	c.lock <- true
 	td := time.Now().Sub(c.lastAccess)
@@ -54,9 +54,9 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 type loginResponse struct {
 	Json struct {
 		Errors [][]string
-		Data struct {
+		Data   struct {
 			Modhash string
-			Cookie string
+			Cookie  string
 		}
 	}
 }
@@ -100,13 +100,13 @@ func (c *Client) Login(user string, passwd string) error {
 // Fields for things that implement Votable
 type Votable struct {
 	Downs int
-	Ups int
+	Ups   int
 	Likes json.RawMessage // can't use bool here since Reddit also uses null; just check the raw string value if you need this field
 }
 
 // Fields for things that implement Created
 type Created struct {
-	Created float64
+	Created     float64
 	Created_utc float64
 }
 
@@ -117,15 +117,15 @@ type Comment struct {
 		Votable
 		Created
 
-		Author string
-		Body string
+		Author    string
+		Body      string
 		Body_html string
-		Id string
-		Name string
+		Id        string
+		Name      string
 		Permalink string
-		Replies json.RawMessage
-		Score int
-		Title string
+		Replies   json.RawMessage
+		Score     int
+		Title     string
 	}
 }
 
@@ -136,26 +136,27 @@ type Link struct {
 		Votable
 		Created
 
-		Domain string
-		Hidden bool
-		Id string
-		Is_self bool
-		Name string
-		Num_comments int
-		Over_18 bool
-		Permalink string
-		Score int
-		Title string
+		Domain          string
+		Hidden          bool
+		Id              string
+		Is_self         bool
+		Name            string
+		Num_comments    int
+		Over_18         bool
+		Permalink       string
+		Score           int
+		Title           string
+		Link_flair_text string
 	}
 }
 
 // A listing of links
 type LinkListing struct {
 	Data struct {
-		Modhash string
+		Modhash  string
 		Children []Link
-		After string
-		Before string
+		After    string
+		Before   string
 	}
 	Kind string
 }
@@ -163,10 +164,10 @@ type LinkListing struct {
 // A listing of comments
 type CommentListing struct {
 	Data struct {
-		Modhash string
+		Modhash  string
 		Children []Comment
-		After string
-		Before string
+		After    string
+		Before   string
 	}
 	Kind string
 }
@@ -196,7 +197,6 @@ func (c *Client) GetSubreddit(sr string, sort string, limit int) ([]Link, error)
 	}
 	return data.Data.Children, err
 }
-
 
 // Get comments for a specific thing ID
 // TODO: implement sorting
@@ -229,9 +229,9 @@ func (c *Client) GetComments(id string, sort string, limit int) ([]Comment, erro
 }
 
 func (com *Comment) GetReplies() ([]Comment, error) {
- 	var replies CommentListing
- 	err := json.Unmarshal(com.Data.Replies, &replies)
- 		return replies.Data.Children, err
+	var replies CommentListing
+	err := json.Unmarshal(com.Data.Replies, &replies)
+	return replies.Data.Children, err
 }
 
 // Returns a flattened list of comments and replies
