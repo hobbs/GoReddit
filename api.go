@@ -16,7 +16,7 @@ const DELAY_S = 2 * time.Second
 
 // Client represents a custom Reddit client that respects the Reddit API rate limit guidelines
 type Client struct {
-	httpClient *http.Client
+	HttpClient *http.Client
 	modhash    string
 	UserAgent  string
 	lock       chan bool
@@ -29,7 +29,7 @@ func NewClient(userAgent string) *Client {
 	if err != nil {
 		return nil
 	}
-	return &Client{httpClient: &http.Client{Jar: jar}, UserAgent: userAgent, lock: make(chan bool, 1), lastAccess: time.Now().Add(-DELAY_S)}
+	return &Client{HttpClient: &http.Client{Jar: jar}, UserAgent: userAgent, lock: make(chan bool, 1), lastAccess: time.Now().Add(-DELAY_S)}
 }
 
 // private utility function to do an API request
@@ -42,7 +42,7 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	}
 	c.lastAccess = time.Now()
 	req.Header.Set("User-Agent", c.UserAgent)
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.HttpClient.Do(req)
 	if err != nil {
 		return resp, err
 	}
